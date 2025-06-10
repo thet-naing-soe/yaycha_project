@@ -1,7 +1,7 @@
 import { useState, createContext, useContext, useMemo } from "react";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { deepPurple, grey } from "@mui/material/colors";
 
 import Template from "./Template";

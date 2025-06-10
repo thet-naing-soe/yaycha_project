@@ -2,16 +2,35 @@ import { Box, Alert } from "@mui/material";
 import Form from "../components/Form";
 import Item from "../components/Item";
 import { useApp } from "../ThemedApp";
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "../ThemedApp";
 
 const api = import.meta.env.VITE_API;
 export default function Home() {
   const { showForm, setGlobalMsg } = useApp();
-  const { isLoading, isError, error, data } = useQuery("posts", async () => {
-    const res = await fetch(`${api}/content/posts`);
-    return res.json();
+  const { isLoading, isError, error, data } = useQuery({
+    queryKey: ["posts"],
+    queryFn: async () => {
+      const res = await fetch(`${api}/content/posts`);
+      return res.json();
+    },
   });
+
+  const remove = useMutation({
+    mutationFn: async (id) => {
+      await fetch(`${api}/content/posts/${id}`, {
+        method: "DELETE",
+      });
+    },
+    onMutate: (id) => {
+      queryClient.cancelQueries("posts");
+      queryClient.setQueryData("posts", (old) =>
+        old.filter((item) => item.id !== id)
+      );
+      setGlobalMsg("A post deleted");
+    },
+  });
+
   if (isError) {
     return (
       <Box>
@@ -23,22 +42,6 @@ export default function Home() {
     return <Box sx={{ textAlign: "center" }}>Loading...</Box>;
   }
 
-  const remove = useMutation(
-    async (id) => {
-      await fetch(`${api}/content/posts/${id}`, {
-        method: "DELETE",
-      });
-    },
-    {
-      onMutate: (id) => {
-        queryClient.cancelQueries("posts");
-        queryClient.setQueryData("posts", (old) =>
-          old.filter((item) => item.id !== id)
-        );
-        setGlobalMsg("A post deleted");
-      },
-    }
-  );
   const add = (content, name) => {
     const id = data[0].id + 1;
     setData([{ id, content, name }, ...data]);

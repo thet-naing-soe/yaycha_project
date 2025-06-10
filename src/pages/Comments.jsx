@@ -1,6 +1,6 @@
 import { Box, Button, TextField } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "../ThemedApp";
 import { useApp } from "../ThemedApp";
 
@@ -10,9 +10,12 @@ export default function Comments() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { setGlobalMsg } = useApp();
-  const { isLoading, isError, error, data } = useQuery("comments", async () => {
-    const res = await fetch(`${api}/content/posts/${id}`);
-    return res.json();
+  const { isLoading, isError, error, data } = useQuery({
+    queryKey: ["comments"],
+    queryFn: async () => {
+      const res = await fetch(`${api}/content/posts/${id}`);
+      return res.json();
+    },
   });
   const removePost = useMutation(async (id) => {
     await fetch(`${api}/content/posts/${id}`, {
