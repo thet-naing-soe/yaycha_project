@@ -11,6 +11,8 @@ import Register from "./pages/Register";
 import Likes from "./pages/Likes";
 import Profile from "./pages/Profile";
 import Comments from "./pages/Comments";
+import { useEffect } from "react";
+import { fetchVerify } from "./libs/fetcher";
 
 const AppContext = createContext();
 
@@ -71,7 +73,11 @@ export default function ThemedApp() {
       },
     });
   }, [mode]);
-
+  useEffect(() => {
+    fetchVerify().then((user) => {
+      if (user) setAuth(user);
+    });
+  }, []);
   return (
     <ThemeProvider theme={theme}>
       <AppContext.Provider
