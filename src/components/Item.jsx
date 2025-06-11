@@ -12,6 +12,17 @@ import { green } from "@mui/material/colors";
 
 export default function Item({ item, remove, primary, comment }) {
   const navigate = useNavigate();
+  const getFormattedDate = () => {
+    try {
+      const date = new Date(item.created);
+      if (isNaN(date.getTime())) {
+        return "Invalid date";
+      }
+      return formatRelative(date, new Date());
+    } catch (e) {
+      return "Unknown time";
+    }
+  };
 
   return (
     <Card sx={{ mb: 2 }}>
@@ -41,7 +52,7 @@ export default function Item({ item, remove, primary, comment }) {
           >
             <TimeIcon fontSize="10" color="success" />
             <Typography variant="caption" sx={{ color: green[500] }}>
-              {formatRelative(item.created, new Date())}
+              {getFormattedDate()}
             </Typography>
           </Box>
           <IconButton
@@ -58,17 +69,19 @@ export default function Item({ item, remove, primary, comment }) {
 
         <Typography sx={{ my: 3 }}>{item.content}</Typography>
 
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 1,
-          }}
-        >
-          <UserIcon fontSize="12" color="info" />
-          <Typography variant="caption">{item.user.name}</Typography>
-        </Box>
+        {item.user && (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <UserIcon fontSize="12" color="info" />
+            <Typography variant="caption">{item.user.name}</Typography>
+          </Box>
+        )}
       </CardContent>
     </Card>
   );
