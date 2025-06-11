@@ -1,46 +1,66 @@
-import { Box, Button, TextField } from "@mui/material";
+import { Box, Button, TextField, Alert } from "@mui/material";
+
+import Item from "../components/Item";
+
+import { useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "../ThemedApp";
 import { useApp } from "../ThemedApp";
+import {
+  fetchComments,
+  postComment,
+  deletePost,
+  deleteComment,
+} from "../libs/fetcher";
 
-import Item from "../components/Item";
-const api = import.meta.env.VITE_API;
 export default function Comments() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { setGlobalMsg } = useApp();
+
+  const contentInput = useRef();
+
+  const { setGlobalMsg, auth } = useApp();
+
   const { isLoading, isError, error, data } = useQuery({
     queryKey: ["comments"],
-    queryFn: async () => {
-      const res = await fetch(`${api}/content/posts/${id}`);
-      return res.json();
-    },
+    queryFn: async () => fetchComments(id),
   });
-  const removePost = useMutation(async (id) => {
-    await fetch(`${api}/content/posts/${id}`, {
-      method: "DELETE",
-    });
-    navigate("/");
-    setGlobalMsg("A post deleted");
-  });
-  const removeComment = useMutation(
-    async (id) => {
-      await fetch(`${api}/content/comments/${id}`, {
-        method: "DELETE",
+
+  const addComment = useMutation({
+    mutationFn: (content) => postComment(content, id),
+    onSuccess: async (comment) => {
+      await queryClient.cancelQueries("comments");
+      await queryClient.setQueryData("comments", (old) => {
+        old.comments = [...old.comments, comment];
+        return { ...old };
       });
+      setGlobalMsg("A comment added");
     },
-    {
-      onMutate: (id) => {
-        queryClient.cancelQueries("comments");
-        queryClient.setQueryData("comments", (old) => {
-          old.comments = old.comments.filter((comment) => comment.id !== id);
-          return { ...old };
-        });
-        setGlobalMsg("A comment deleted");
-      },
-    }
-  );
+  });
+
+  const removePost = useMutation({
+    mutationFn: async (id) => deletePost(id),
+    onSuccess: async () => {
+      await queryClient.refetchQueries("posts");
+
+      navigate("/");
+      setGlobalMsg("A post deleted");
+    },
+  });
+
+  const removeComment = useMutation({
+    mutationFn: async (id) => deleteComment(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries("comments");
+      await queryClient.setQueryData("comments", (old) => {
+        old.comments = old.comments.filter((comment) => comment.id !== id);
+        return { ...old };
+      });
+      setGlobalMsg("A comment deleted");
+    },
+  });
+
   if (isError) {
     return (
       <Box>
@@ -48,9 +68,11 @@ export default function Comments() {
       </Box>
     );
   }
+
   if (isLoading) {
     return <Box sx={{ textAlign: "center" }}>Loading...</Box>;
   }
+
   return (
     <Box>
       <Item primary item={data} remove={removePost.mutate} />
@@ -61,25 +83,42 @@ export default function Comments() {
             key={comment.id}
             item={comment}
             remove={removeComment.mutate}
+            owner={data.userId}
           />
         );
       })}
 
-      <form>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-            mt: 3,
+      {auth && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const content = contentInput.current.value;
+            if (!content) return false;
+
+            addComment.mutate(content);
+
+            e.currentTarget.reset();
           }}
         >
-          <TextField multiline placeholder="Your Comment" />
-          <Button type="submit" variant="contained">
-            Reply
-          </Button>
-        </Box>
-      </form>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              mt: 3,
+            }}
+          >
+            <TextField
+              inputRef={contentInput}
+              multiline
+              placeholder="Your Comment"
+            />
+            <Button type="submit" variant="contained">
+              Reply
+            </Button>
+          </Box>
+        </form>
+      )}
     </Box>
   );
 }
