@@ -9,6 +9,17 @@ export async function fetchPosts() {
   return res.json();
 }
 
+export async function fetchFollowingPosts() {
+  const token = getToken();
+  const res = await fetch(`${api}/content/following/posts`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.json();
+}
+
 export async function fetchComments(id) {
   const res = await fetch(`${api}/content/posts/${id}`);
   return res.json();
@@ -130,4 +141,91 @@ export async function deleteComment(id) {
   });
 
   return res.text();
+}
+
+export async function postPostLike(id) {
+  const token = getToken();
+  const res = await fetch(`${api}/content/like/posts/${id}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.json();
+}
+
+export async function postCommentLike(id) {
+  const token = getToken();
+  const res = await fetch(`${api}/content/like/comments/${id}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.json();
+}
+
+export async function deletePostLike(id) {
+  const token = getToken();
+  const res = await fetch(`${api}/content/unlike/posts/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.json();
+}
+
+export async function deleteCommentLike(id) {
+  const token = getToken();
+  const res = await fetch(`${api}/content/unlike/comments/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.json();
+}
+
+export async function fetchPostLikes(id) {
+  const res = await fetch(`${api}/content/likes/posts/${id}`);
+  return res.json();
+}
+
+export async function fetchCommentLikes(id) {
+  const res = await fetch(`${api}/content/likes/comments/${id}`);
+  return res.json();
+}
+
+export async function fetchSearch(q) {
+  const res = await fetch(`${api}/search?q=${q}`);
+  return res.json();
+}
+
+export async function postFollow(id) {
+  const token = getToken();
+  const res = await fetch(`${api}/follow/${id}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.json();
+}
+
+export async function deleteFollow(id) {
+  const token = getToken();
+  const res = await fetch(`${api}/unfollow/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.json();
 }
