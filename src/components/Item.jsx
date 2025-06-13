@@ -1,5 +1,5 @@
 import { Box, Card, CardContent, Typography, IconButton } from "@mui/material";
-import { formatRelative } from "date-fns";
+
 import {
   Alarm as TimeIcon,
   AccountCircle as UserIcon,
@@ -7,20 +7,34 @@ import {
 } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
-
 import { green } from "@mui/material/colors";
+import { formatRelative, isValid, parseISO } from "date-fns";
+import { useApp } from "../ThemedApp";
 
-export default function Item({ item, remove, primary, comment }) {
+import LikeButton from "./LikeButton";
+import CommentButton from "./CommentButton";
+
+export default function Item({ item, remove, primary, comment, owner }) {
   const navigate = useNavigate();
-  const getFormattedDate = () => {
-    try {
-      const date = new Date(item.created);
-      if (isNaN(date.getTime())) {
-        return "Invalid date";
-      }
+  const { auth } = useApp();
+
+  function isOwner() {
+    if (!auth) return false;
+    return auth.id === item.userId || auth.id === owner;
+  }
+
+  const getFormattedDate = (dateValue) => {
+    if (!dateValue) {
+      return "Date unavailable"; 
+    }
+
+    const date = parseISO(String(dateValue));
+
+    if (isValid(date)) {
       return formatRelative(date, new Date());
-    } catch (e) {
-      return "Unknown time";
+    } else {
+      console.warn("Invalid date format for item.created:", dateValue);
+      return "Invalid date";
     }
   };
 
@@ -52,27 +66,41 @@ export default function Item({ item, remove, primary, comment }) {
           >
             <TimeIcon fontSize="10" color="success" />
             <Typography variant="caption" sx={{ color: green[500] }}>
-              {getFormattedDate()}
+              {getFormattedDate(item.created)}
             </Typography>
           </Box>
-          <IconButton
-            sx={{ color: "text.fade" }}
-            size="small"
-            onClick={(e) => {
-              remove(item.id);
-              e.stopPropagation();
-            }}
-          >
-            <DeleteIcon color="inherit" fontSize="inherit" />
-          </IconButton>
+
+          {isOwner() && (
+            <IconButton
+              sx={{ color: "text.fade" }}
+              size="small"
+              onClick={(e) => {
+                remove(item.id);
+                e.stopPropagation();
+              }}
+            >
+              <DeleteIcon color="inherit" fontSize="inherit" />
+            </IconButton>
+          )}
         </Box>
 
         <Typography sx={{ my: 3 }}>{item.content}</Typography>
 
-        {item.user && (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <Box
             onClick={(e) => {
-              navigate(`/profile/${item.user.id}`);
+              if (item.user?.id) { 
+                navigate(`/profile/${item.user.id}`);
+              } else {
+                console.warn("User ID not available for navigation:", item.user);
+              }
               e.stopPropagation();
             }}
             sx={{
@@ -83,9 +111,13 @@ export default function Item({ item, remove, primary, comment }) {
             }}
           >
             <UserIcon fontSize="12" color="info" />
-            <Typography variant="caption">{item.user.name}</Typography>
+            <Typography variant="caption">{item.user?.name}</Typography>
           </Box>
-        )}
+          <Box>
+            <LikeButton item={item} comment={comment} />
+            <CommentButton item={item} comment={comment} />
+          </Box>
+        </Box>
       </CardContent>
     </Card>
   );

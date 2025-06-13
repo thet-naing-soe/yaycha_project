@@ -1,8 +1,10 @@
-import { useState, createContext, useContext, useMemo } from "react";
+import { useState, createContext, useContext, useMemo, useEffect } from "react";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 import { deepPurple, grey } from "@mui/material/colors";
+
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
 import Template from "./Template";
 import Home from "./pages/Home";
@@ -11,7 +13,8 @@ import Register from "./pages/Register";
 import Likes from "./pages/Likes";
 import Profile from "./pages/Profile";
 import Comments from "./pages/Comments";
-import { useEffect } from "react";
+import Search from "./pages/Search";
+
 import { fetchVerify } from "./libs/fetcher";
 
 const AppContext = createContext();
@@ -46,8 +49,12 @@ const router = createBrowserRouter([
         element: <Profile />,
       },
       {
-        path: "/likes/:id",
+        path: "/likes/:id/:type",
         element: <Likes />,
+      },
+      {
+        path: "/search",
+        element: <Search />,
       },
     ],
   },

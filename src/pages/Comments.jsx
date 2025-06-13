@@ -72,11 +72,13 @@ export default function Comments() {
   if (isLoading) {
     return <Box sx={{ textAlign: "center" }}>Loading...</Box>;
   }
-
+  if (!data) {
+    return <Box sx={{ textAlign: "center" }}>No post found for comments.</Box>;
+  }
   return (
     <Box>
       <Item primary item={data} remove={removePost.mutate} />
-      {data.comments.map((comment) => {
+      {data.comments?.map((comment) => {
         return (
           <Item
             comment
@@ -87,6 +89,11 @@ export default function Comments() {
           />
         );
       })}
+      {data.comments?.length === 0 && (
+        <Box sx={{ textAlign: "center", py: 2, color: "text.secondary" }}>
+          No comments yet.
+        </Box>
+      )}
 
       {auth && (
         <form

@@ -5,19 +5,53 @@ function getToken() {
 }
 
 export async function fetchPosts() {
-  const res = await fetch(`${api}/content/posts`);
-  return res.json();
+	const res = await fetch(`${api}/content/posts`);
+	
+	if (!res.ok) {
+        const errorData = await res.json(); 
+        console.error('fetchPosts error response from API:', errorData);
+        throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
+	}
+
+	const result = await res.json();
+    
+    console.log('Successfully fetched posts data:', result);
+
+    if (result && Array.isArray(result.posts)) {
+        return result.posts;
+    }
+    if (Array.isArray(result)) { 
+        return result;
+    }
+    console.warn('Unexpected data format for posts, returning empty array:', result);
+    return [];
 }
 
 export async function fetchFollowingPosts() {
-  const token = getToken();
-  const res = await fetch(`${api}/content/following/posts`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+	const token = getToken();
+	const res = await fetch(`${api}/content/following/posts`, {
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+	});
 
-  return res.json();
+    if (!res.ok) {
+        const errorData = await res.json();
+        console.error('fetchFollowingPosts error response from API:', errorData);
+        throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
+    }
+
+	const result = await res.json();
+    console.log('Successfully fetched following posts data:', result);
+    
+    if (result && Array.isArray(result.posts)) {
+        return result.posts;
+    }
+    if (Array.isArray(result)) {
+        return result;
+    }
+    console.warn('Unexpected data format for following posts, returning empty array:', result);
+    return [];
 }
 
 export async function fetchComments(id) {

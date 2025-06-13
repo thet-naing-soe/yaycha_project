@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { Alert, Box, Button, Typography } from "@mui/material";
-
 import Form from "../components/Form";
 import Item from "../components/Item";
-
 import { useApp } from "../ThemedApp";
-
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "../ThemedApp";
 import {
@@ -86,10 +83,9 @@ export default function Home() {
         </Box>
       )}
 
-      {Array.isArray(data) &&
-        data.map((item) => {
-          return <Item key={item.id} item={item} remove={remove.mutate} />;
-        })}
+      {data?.map((item) => {
+        return <Item key={item.id} item={item} remove={remove.mutate} />;
+      })}
     </Box>
   );
 }
