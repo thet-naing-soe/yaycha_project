@@ -5,53 +5,59 @@ function getToken() {
 }
 
 export async function fetchPosts() {
-	const res = await fetch(`${api}/content/posts`);
-	
-	if (!res.ok) {
-        const errorData = await res.json(); 
-        console.error('fetchPosts error response from API:', errorData);
-        throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
-	}
+  const res = await fetch(`${api}/content/posts`);
 
-	const result = await res.json();
-    
-    console.log('Successfully fetched posts data:', result);
+  if (!res.ok) {
+    const errorData = await res.json();
+    console.error("fetchPosts error response from API:", errorData);
+    throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
+  }
 
-    if (result && Array.isArray(result.posts)) {
-        return result.posts;
-    }
-    if (Array.isArray(result)) { 
-        return result;
-    }
-    console.warn('Unexpected data format for posts, returning empty array:', result);
-    return [];
+  const result = await res.json();
+
+  console.log("Successfully fetched posts data:", result);
+
+  if (result && Array.isArray(result.posts)) {
+    return result.posts;
+  }
+  if (Array.isArray(result)) {
+    return result;
+  }
+  console.warn(
+    "Unexpected data format for posts, returning empty array:",
+    result
+  );
+  return [];
 }
 
 export async function fetchFollowingPosts() {
-	const token = getToken();
-	const res = await fetch(`${api}/content/following/posts`, {
-		headers: {
-			Authorization: `Bearer ${token}`,
-		},
-	});
+  const token = getToken();
+  const res = await fetch(`${api}/content/following/posts`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-    if (!res.ok) {
-        const errorData = await res.json();
-        console.error('fetchFollowingPosts error response from API:', errorData);
-        throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
-    }
+  if (!res.ok) {
+    const errorData = await res.json();
+    console.error("fetchFollowingPosts error response from API:", errorData);
+    throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
+  }
 
-	const result = await res.json();
-    console.log('Successfully fetched following posts data:', result);
-    
-    if (result && Array.isArray(result.posts)) {
-        return result.posts;
-    }
-    if (Array.isArray(result)) {
-        return result;
-    }
-    console.warn('Unexpected data format for following posts, returning empty array:', result);
-    return [];
+  const result = await res.json();
+  console.log("Successfully fetched following posts data:", result);
+
+  if (result && Array.isArray(result.posts)) {
+    return result.posts;
+  }
+  if (Array.isArray(result)) {
+    return result;
+  }
+  console.warn(
+    "Unexpected data format for following posts, returning empty array:",
+    result
+  );
+  return [];
 }
 
 export async function fetchComments(id) {
@@ -261,5 +267,35 @@ export async function deleteFollow(id) {
     },
   });
 
+  return res.json();
+}
+
+export async function fetchNotis() {
+  const token = getToken();
+  const res = await fetch(`${api}/content/notis`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.json();
+}
+export async function putAllNotisRead() {
+  const token = getToken();
+  const res = await fetch(`${api}/content/notis/read`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.json();
+}
+export async function putNotiRead(id) {
+  const token = getToken();
+  const res = await fetch(`${api}/content/notis/read/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   return res.json();
 }

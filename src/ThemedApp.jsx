@@ -14,6 +14,8 @@ import Likes from "./pages/Likes";
 import Profile from "./pages/Profile";
 import Comments from "./pages/Comments";
 import Search from "./pages/Search";
+import Notis from "./pages/Notis";
+import AppSocket from "./AppSocket";
 
 import { fetchVerify } from "./libs/fetcher";
 
@@ -55,6 +57,10 @@ const router = createBrowserRouter([
       {
         path: "/search",
         element: <Search />,
+      },
+      {
+        path: "/notis",
+        element: <Notis />,
       },
     ],
   },
@@ -103,6 +109,7 @@ export default function ThemedApp() {
       >
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={router} />
+          <AppSocket />
         </QueryClientProvider>
         <CssBaseline />
       </AppContext.Provider>
